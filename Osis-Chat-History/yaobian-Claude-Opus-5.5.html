@@ -1,0 +1,1074 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>窑变</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap">
+<style>
+  :root {
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    --bg-top: #e8d6c4;
+    --bg-bottom: #ae8b7f;
+    --ink: #2d2d2d;
+    --ink-soft: #5e5550;
+    --fill-bg: #a52525;
+    --fill-ink: #ffffff;
+    --line: #a52525;
+    --line-ink: #a52525;
+    --line-on: #ffffff;
+    --off-bg: #d68c80;
+    --off-ink: #3f2f2c;
+    --focus: #5125a5;
+    --bar-bg: rgba(242, 230, 218, 0.8);
+    --bar-edge: rgba(165, 37, 37, 0.16);
+    --seal: #a52525;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg-top: #1e1e1e;
+      --bg-bottom: #110d18;
+      --ink: #e2e1e1;
+      --ink-soft: #b3aebd;
+      --fill-bg: #5125a5;
+      --fill-ink: #ffa92e;
+      --line: #7e5eff;
+      --line-ink: #a58cff;
+      --line-on: #000000;
+      --off-bg: #7e5eff;
+      --off-ink: #000000;
+      --focus: #ffa92e;
+      --bar-bg: rgba(30, 30, 30, 0.8);
+      --bar-edge: rgba(126, 94, 255, 0.3);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg-top: #1e1e1e;
+    --bg-bottom: #110d18;
+    --ink: #e2e1e1;
+    --ink-soft: #b3aebd;
+    --fill-bg: #5125a5;
+    --fill-ink: #ffa92e;
+    --line: #7e5eff;
+    --line-ink: #a58cff;
+    --line-on: #000000;
+    --off-bg: #7e5eff;
+    --off-ink: #000000;
+    --focus: #ffa92e;
+    --bar-bg: rgba(30, 30, 30, 0.8);
+    --bar-edge: rgba(126, 94, 255, 0.3);
+    color-scheme: dark;
+  }
+  body[data-scene="dawn"] {
+    --bg-top: #e8d6c4;
+    --bg-bottom: #ae8b7f;
+    --ink: #2d2d2d;
+    --ink-soft: #5e5550;
+    --fill-bg: #a52525;
+    --fill-ink: #ffffff;
+    --line: #a52525;
+    --line-ink: #a52525;
+    --line-on: #ffffff;
+    --off-bg: #d68c80;
+    --off-ink: #3f2f2c;
+    --focus: #5125a5;
+    --bar-bg: rgba(242, 230, 218, 0.8);
+    --bar-edge: rgba(165, 37, 37, 0.16);
+  }
+  body[data-scene="night"] {
+    --bg-top: #1e1e1e;
+    --bg-bottom: #110d18;
+    --ink: #e2e1e1;
+    --ink-soft: #b3aebd;
+    --fill-bg: #5125a5;
+    --fill-ink: #ffa92e;
+    --line: #7e5eff;
+    --line-ink: #a58cff;
+    --line-on: #000000;
+    --off-bg: #7e5eff;
+    --off-ink: #000000;
+    --focus: #ffa92e;
+    --bar-bg: rgba(30, 30, 30, 0.8);
+    --bar-edge: rgba(126, 94, 255, 0.3);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { height: 100%; scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: var(--ink);
+    background-color: var(--bg-bottom);
+    background-image: linear-gradient(var(--bg-top), var(--bg-bottom));
+    font-family: "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC", "SimSun", serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  #scene { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: block; }
+  .masthead {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: calc(22px + env(safe-area-inset-top, 0px)) 24px 0;
+    pointer-events: none;
+  }
+  .masthead h1 {
+    margin: 0;
+    font-size: clamp(30px, 4.2vw, 44px);
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+  .masthead .sub {
+    margin: 10px 0 0;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    max-width: 20em;
+  }
+  .masthead .kiln { margin: 12px 0 0; font-size: 14px; line-height: 1.6; }
+  .masthead .kiln strong { font-weight: 700; }
+  .masthead .kiln span { display: block; color: var(--ink-soft); }
+  .seal {
+    flex: none;
+    width: 54px;
+    height: 54px;
+    margin-top: 4px;
+    padding: 6px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    place-items: center;
+    background: var(--seal);
+    color: #ffffff;
+    border-radius: 5px;
+    box-shadow: inset 0 0 0 2px var(--seal), inset 0 0 0 3.5px rgba(255, 255, 255, 0.9), 0 2px 6px rgba(0, 0, 0, 0.18);
+    transform: rotate(-4deg);
+    font-weight: 700;
+    font-size: 17px;
+    line-height: 1;
+  }
+  .controls {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    padding: 12px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+  }
+  .controls .inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 12px;
+    max-width: 100%;
+    padding: 12px 14px;
+    border-radius: 18px;
+    background: var(--bar-bg);
+    border: 1px solid var(--bar-edge);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+  }
+  button {
+    font: inherit;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1;
+    min-height: 42px;
+    padding: 11px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  .fill { min-width: 5.5em; border: 0; background: var(--fill-bg); color: var(--fill-ink); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); }
+  .line { background: transparent; color: var(--line-ink); border: 2px solid var(--line); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08); }
+  .line[aria-pressed="true"] { background: var(--line); color: var(--line-on); }
+  .seg { display: inline-flex; gap: 6px; }
+  .seg button { border: 0; background: var(--off-bg); color: var(--off-ink); }
+  .seg button[aria-pressed="true"] { background: var(--fill-bg); color: var(--fill-ink); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); }
+  .vol { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink); }
+  .vol input { width: 108px; accent-color: var(--fill-bg); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+  @media (max-width: 520px) {
+    .masthead { padding-left: 18px; padding-right: 18px; }
+    .masthead .sub { font-size: 14px; }
+    button { padding: 10px 14px; font-size: 14px; }
+    .vol input { width: 88px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="scene" role="img" aria-label="一只慢慢转动的碗，釉色跟着音乐生长"></canvas>
+<header class="masthead">
+  <div>
+    <h1>窑变</h1>
+    <p class="sub">一支不会重复的无词曲。烧过的一窑，不会再来。</p>
+    <p class="kiln" aria-live="polite"><strong id="kilnNo">还没点火</strong><span id="kilnDetail"></span></p>
+  </div>
+  <div class="seal" role="img" aria-label="印章：上下未形"><span>未</span><span>上</span><span>形</span><span>下</span></div>
+</header>
+<nav class="controls" aria-label="播放控制">
+  <div class="inner">
+    <button class="fill" id="play" type="button">点火</button>
+    <div class="seg" role="group" aria-label="时辰">
+      <button id="dawn" type="button" aria-pressed="true">破晓</button>
+      <button id="night" type="button" aria-pressed="false">星夜</button>
+    </div>
+    <button class="line" id="kilnBtn" type="button">再烧一窑</button>
+    <button class="line" id="rain" type="button" aria-pressed="false">雨声</button>
+    <label class="vol">音量 <input id="vol" type="range" min="0" max="100" value="70"></label>
+  </div>
+</nav>
+<script>
+(() => {
+  'use strict';
+
+  const doc = document.documentElement;
+  const body = document.body;
+  const canvas = document.getElementById('scene');
+  const g2 = canvas.getContext('2d');
+  const header = document.querySelector('.masthead');
+  const controls = document.querySelector('.controls');
+  const btnPlay = document.getElementById('play');
+  const btnDawn = document.getElementById('dawn');
+  const btnNight = document.getElementById('night');
+  const btnKiln = document.getElementById('kilnBtn');
+  const btnRain = document.getElementById('rain');
+  const volInput = document.getElementById('vol');
+  const kilnNoEl = document.getElementById('kilnNo');
+  const kilnDetailEl = document.getElementById('kilnDetail');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const hexToRgb = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  };
+  const rgba = (rgb, a) => 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + Math.max(0, Math.min(1, a)).toFixed(4) + ')';
+
+  function initialScene() {
+    const t = doc.getAttribute('data-theme');
+    if (t === 'dark') return 'night';
+    if (t === 'light') return 'dawn';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'dawn';
+  }
+  let scene = initialScene();
+
+  const PALETTES = {
+    dawn: {
+      clay: '#c7ab95', rim: '#a98a76', raw: '#dac8b6', base: '#efe5d8',
+      bass: ['#ae8b7f', '#d68c80', '#c9a27e'],
+      arp: ['#ffa92e', '#d68c80', '#e9b27a', '#f0c58f'],
+      mel: ['#a52525', '#ffa92e', '#c2452f'],
+      splash: ['#7e5eff', '#5125a5'],
+      composite: 'source-over',
+      spark: [255, 255, 255],
+      gloss: 0.24,
+      shadow: 'rgba(84, 52, 42, 0.30)',
+      depth: 'rgba(96, 58, 44, 0.22)',
+      glow: 'rgba(255, 169, 46, 0.16)',
+      flash: [255, 169, 46],
+      caption: '#5e5550',
+      rain: 'rgba(255, 255, 255, 0.30)',
+      bgTop: '#e8d6c4', bgBottom: '#ae8b7f'
+    },
+    night: {
+      clay: '#2e2637', rim: '#3d3348', raw: '#261f2e', base: '#15101d',
+      bass: ['#5125a5', '#3b2a78'],
+      arp: ['#7e5eff', '#6fa3b8', '#5125a5', '#8f7dff'],
+      mel: ['#ffa92e', '#e2e1e1'],
+      splash: ['#ffa92e', '#a52525'],
+      composite: 'screen',
+      spark: [255, 200, 120],
+      gloss: 0.10,
+      shadow: 'rgba(0, 0, 0, 0.55)',
+      depth: 'rgba(0, 0, 0, 0.45)',
+      glow: 'rgba(81, 37, 165, 0.30)',
+      flash: [126, 94, 255],
+      caption: '#b3aebd',
+      rain: 'rgba(226, 225, 225, 0.12)',
+      bgTop: '#1e1e1e', bgBottom: '#110d18'
+    }
+  };
+
+  /* ---------------- music ---------------- */
+
+  const MODES = {
+    ionian: { steps: [0, 2, 4, 5, 7, 9, 11], name: '大调' },
+    lydian: { steps: [0, 2, 4, 6, 7, 9, 11], name: '利底亚' },
+    mixolydian: { steps: [0, 2, 4, 5, 7, 9, 10], name: '混合利底亚' },
+    dorian: { steps: [0, 2, 3, 5, 7, 9, 10], name: '多利亚' },
+    aeolian: { steps: [0, 2, 3, 5, 7, 8, 10], name: '自然小调' }
+  };
+  const ROOTS = [
+    { pc: 0, name: 'C' }, { pc: 2, name: 'D' }, { pc: 4, name: 'E' }, { pc: 5, name: 'F' },
+    { pc: 7, name: 'G' }, { pc: 9, name: 'A' }, { pc: 10, name: '降B' }
+  ];
+  const PROGS = {
+    dawn: [[0, 4, 5, 3], [0, 3, 0, 4], [0, 5, 3, 4], [3, 4, 2, 5], [0, 1, 3, 0], [0, 3, 5, 4]],
+    night: [[0, 5, 6, 0], [0, 3, 4, 0], [0, 6, 5, 6], [0, 2, 5, 4], [5, 6, 0, 0], [0, 3, 0, 6]]
+  };
+  const PATTERNS = [
+    [0, 2, 4, 2, 5, 2, 4, 2],
+    [0, -1, 2, 4, -1, 5, 4, 2],
+    [0, 4, 5, 4, 2, 4, 1, 4],
+    [0, 2, 3, 4, 5, 4, 3, 2],
+    [0, -1, 4, -1, 2, -1, 5, -1],
+    [0, 4, 2, 4, 5, 4, 2, 4]
+  ];
+  const MEL_WEIGHT = [1, 0.3, 0.6, 0.8, 0.9, 0.3, 0.7, 0.4];
+
+  function makeConfig(sc) {
+    const modeKey = sc === 'dawn' ? pick(['ionian', 'lydian', 'mixolydian']) : pick(['dorian', 'aeolian']);
+    return {
+      scene: sc,
+      mode: MODES[modeKey],
+      root: pick(ROOTS),
+      bpm: Math.round(sc === 'dawn' ? rnd(66, 80) : rnd(56, 68)),
+      prog: pick(PROGS[sc]).slice(),
+      barsPerChord: Math.random() < 0.55 ? 1 : 2,
+      pattern: pick(PATTERNS).slice(),
+      swing: rnd(0, 0.12),
+      skip: rnd(0.06, 0.22),
+      melody: rnd(0.12, 0.3)
+    };
+  }
+
+  let cfg = null;
+  function degToMidi(base, deg) {
+    const s = cfg.mode.steps;
+    const oct = Math.floor(deg / 7);
+    const idx = ((deg % 7) + 7) % 7;
+    return base + s[idx] + 12 * oct;
+  }
+  function norm(m, lo, hi) {
+    while (m > hi) m -= 12;
+    while (m < lo) m += 12;
+    return m;
+  }
+  const bassBase = () => 36 + cfg.root.pc;
+  const arpBase = () => 48 + cfg.root.pc;
+  const melBase = () => 60 + cfg.root.pc;
+  const stepDur = () => 60 / cfg.bpm / 2;
+  const barDur = () => stepDur() * 8;
+
+  /* ---------------- audio graph ---------------- */
+
+  let actx = null;
+  let master = null;
+  let dry = null;
+  let wetIn = null;
+  let conv = null;
+  let wetOut = null;
+  let noiseBuf = null;
+  const pluckCache = new Map();
+  let volume = volInput.value / 100;
+  const gainFromVolume = () => Math.pow(volume, 1.6) * 0.95;
+
+  function setupAudio() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    actx = new AC();
+    master = actx.createGain();
+    master.gain.value = 0;
+    const comp = actx.createDynamicsCompressor();
+    comp.threshold.value = -16;
+    comp.knee.value = 10;
+    comp.ratio.value = 3;
+    comp.attack.value = 0.01;
+    comp.release.value = 0.3;
+    master.connect(comp);
+    comp.connect(actx.destination);
+    dry = actx.createGain();
+    dry.gain.value = 0.9;
+    dry.connect(master);
+    wetIn = actx.createGain();
+    conv = actx.createConvolver();
+    wetOut = actx.createGain();
+    wetOut.gain.value = 0.4;
+    wetIn.connect(conv);
+    conv.connect(wetOut);
+    wetOut.connect(master);
+    noiseBuf = makeNoise(2.5);
+    buildReverb(scene);
+  }
+
+  function makeNoise(secs) {
+    const len = Math.floor(actx.sampleRate * secs);
+    const b = actx.createBuffer(1, len, actx.sampleRate);
+    const d = b.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    return b;
+  }
+
+  function buildReverb(sc) {
+    const sr = actx.sampleRate;
+    const len = Math.floor(sr * (sc === 'night' ? 5.0 : 3.2));
+    const power = sc === 'night' ? 2.1 : 2.8;
+    const ir = actx.createBuffer(2, len, sr);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = ir.getChannelData(ch);
+      let lp = 0;
+      for (let i = 0; i < len; i++) {
+        lp = lp * 0.55 + (Math.random() * 2 - 1) * 0.45;
+        d[i] = lp * Math.pow(1 - i / len, power);
+      }
+    }
+    conv.buffer = ir;
+    wetOut.gain.setTargetAtTime(sc === 'night' ? 0.55 : 0.36, actx.currentTime, 0.4);
+  }
+
+  // Karplus-Strong plucked string, rendered once per pitch and cached.
+  function pluckVoice(midi) {
+    let v = pluckCache.get(midi);
+    if (v) return v;
+    const sr = actx.sampleRate;
+    const f = 440 * Math.pow(2, (midi - 69) / 12);
+    const t60 = Math.max(1.3, Math.min(4.2, 4.2 - Math.log2(f / 80) * 0.75));
+    const len = Math.floor(sr * Math.min(4.6, t60 + 0.4));
+    const N = Math.max(2, Math.floor(sr / f));
+    // Compensate the averaging filter's own loss so high strings ring as long as intended.
+    const rho = Math.min(0.9995, Math.exp(-6.9 / (f * t60)) / Math.cos(Math.PI * f / sr));
+    const ring = new Float32Array(N);
+    let prev = 0;
+    let mean = 0;
+    for (let i = 0; i < N; i++) {
+      prev = prev * 0.35 + (Math.random() * 2 - 1) * 0.65;
+      ring[i] = prev;
+      mean += prev;
+    }
+    mean /= N;
+    for (let i = 0; i < N; i++) ring[i] -= mean;
+    const buf = actx.createBuffer(1, len, sr);
+    const out = buf.getChannelData(0);
+    let idx = 0;
+    let peak = 0;
+    for (let i = 0; i < len; i++) {
+      const nidx = idx + 1 === N ? 0 : idx + 1;
+      const a = ring[idx];
+      out[i] = a;
+      ring[idx] = rho * 0.5 * (a + ring[nidx]);
+      idx = nidx;
+      const m = a < 0 ? -a : a;
+      if (m > peak) peak = m;
+    }
+    const fi = Math.floor(sr * 0.003);
+    for (let i = 0; i < fi && i < len; i++) out[i] *= i / fi;
+    const fo = Math.floor(sr * 0.3);
+    for (let i = 0; i < fo && i < len; i++) out[len - 1 - i] *= i / fo;
+    if (peak > 0) {
+      const k = 0.9 / peak;
+      for (let i = 0; i < len; i++) out[i] *= k;
+    }
+    // This loop averages each sample with the next one, so the true period is N - 0.5 samples;
+    // playbackRate puts the pitch back in tune.
+    v = { buf: buf, rate: f * (N - 0.5) / sr };
+    pluckCache.set(midi, v);
+    return v;
+  }
+
+  function route(node, pan, toWet) {
+    let out = node;
+    if (actx.createStereoPanner) {
+      const p = actx.createStereoPanner();
+      p.pan.value = pan;
+      node.connect(p);
+      out = p;
+    }
+    out.connect(dry);
+    if (toWet) out.connect(wetIn);
+    return out;
+  }
+
+  function playPluck(midi, t, vel, pan, bright) {
+    const v = pluckVoice(midi);
+    const src = actx.createBufferSource();
+    src.buffer = v.buf;
+    src.playbackRate.value = v.rate;
+    const lp = actx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = bright;
+    lp.Q.value = 0.4;
+    const g = actx.createGain();
+    g.gain.value = vel;
+    src.connect(lp);
+    lp.connect(g);
+    route(g, pan, true);
+    src.start(t);
+    src.stop(t + v.buf.duration / v.rate + 0.05);
+  }
+
+  function playPad(midis, t, dur) {
+    const level = scene === 'night' ? 0.013 : 0.010;
+    const g = actx.createGain();
+    const lp = actx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = scene === 'night' ? 620 : 900;
+    lp.Q.value = 0.5;
+    const attack = Math.min(2.4, dur * 0.5);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(level, t + attack);
+    g.gain.setValueAtTime(level, t + dur);
+    g.gain.linearRampToValueAtTime(0, t + dur + 2.6);
+    lp.connect(g);
+    g.connect(dry);
+    g.connect(wetIn);
+    midis.forEach((m, i) => {
+      const f = 440 * Math.pow(2, (m - 69) / 12);
+      [-5, 5].forEach((cents) => {
+        const o = actx.createOscillator();
+        o.type = i === 0 ? 'sine' : 'triangle';
+        o.frequency.value = f;
+        o.detune.value = cents;
+        o.connect(lp);
+        o.start(t);
+        o.stop(t + dur + 2.8);
+      });
+    });
+  }
+
+  let rainOn = false;
+  let rainNodes = null;
+  let rainCursor = 0;
+
+  function startRain() {
+    if (rainNodes || !actx) return;
+    const src = actx.createBufferSource();
+    src.buffer = noiseBuf;
+    src.loop = true;
+    const bp = actx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 1500;
+    bp.Q.value = 0.45;
+    const shelf = actx.createBiquadFilter();
+    shelf.type = 'highshelf';
+    shelf.frequency.value = 4200;
+    shelf.gain.value = -9;
+    const g = actx.createGain();
+    g.gain.value = 0;
+    src.connect(bp);
+    bp.connect(shelf);
+    shelf.connect(g);
+    g.connect(master);
+    src.start();
+    g.gain.setTargetAtTime(0.07, actx.currentTime, 1.2);
+    rainNodes = { src: src, g: g };
+    rainCursor = actx.currentTime;
+  }
+
+  function stopRain() {
+    if (!rainNodes) return;
+    const now = actx.currentTime;
+    rainNodes.g.gain.cancelScheduledValues(now);
+    rainNodes.g.gain.setTargetAtTime(0, now, 0.7);
+    rainNodes.src.stop(now + 4);
+    rainNodes = null;
+  }
+
+  function playDrop(t) {
+    const src = actx.createBufferSource();
+    src.buffer = noiseBuf;
+    const bp = actx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = rnd(2000, 5200);
+    bp.Q.value = rnd(5, 12);
+    const g = actx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(rnd(0.18, 0.4), t + 0.003);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + rnd(0.035, 0.08));
+    src.connect(bp);
+    bp.connect(g);
+    let out = g;
+    if (actx.createStereoPanner) {
+      const p = actx.createStereoPanner();
+      p.pan.value = rnd(-0.9, 0.9);
+      g.connect(p);
+      out = p;
+    }
+    out.connect(master);
+    src.start(t, rnd(0, 2), 0.12);
+  }
+
+  /* ---------------- scheduler ---------------- */
+
+  let started = false;
+  let playing = false;
+  let starting = false;
+  let schedTimer = null;
+  let nextTime = 0;
+  let step = 0;
+  let melDeg = 8;
+  let kilnNo = 0;
+  const pending = [];
+
+  function emit(kind, midi, t) {
+    pending.push({ kind: kind, midi: midi, t: t });
+  }
+
+  function evolve() {
+    const r = Math.random();
+    if (r < 0.3) cfg.pattern = pick(PATTERNS).slice();
+    else if (r < 0.5) cfg.skip = rnd(0.06, 0.3);
+    else if (r < 0.7) cfg.melody = rnd(0.08, 0.34);
+    else cfg.prog = pick(PROGS[cfg.scene]).slice();
+  }
+
+  function scheduleStep(s, t0) {
+    const bs = s % 8;
+    const bar = Math.floor(s / 8);
+    if (bs === 0 && bar > 0 && bar % 16 === 0) evolve();
+    const sd = stepDur();
+    const t = t0 + (bs % 2 === 1 ? cfg.swing * sd : 0);
+    const d = cfg.prog[Math.floor(bar / cfg.barsPerChord) % cfg.prog.length];
+
+    if (bs === 0 && bar % cfg.barsPerChord === 0) {
+      const bm = norm(degToMidi(bassBase(), d), 38, 50);
+      playPluck(bm, t, 0.62, -0.08, 1100);
+      emit('bass', bm, t);
+      const padNotes = [d, d + 2, d + 4, d + 6].map((x) => norm(degToMidi(arpBase(), x), 50, 69));
+      playPad(padNotes, t, barDur() * cfg.barsPerChord);
+      if (Math.random() < 0.16) emit('splash', bm, t + 0.08);
+    } else if (bs === 4 && Math.random() < 0.4) {
+      const bm = norm(degToMidi(bassBase(), d + 4), 38, 52);
+      playPluck(bm, t + rnd(-0.006, 0.006), 0.38, -0.08, 950);
+      emit('bass', bm, t);
+    }
+
+    const pi = cfg.pattern[bs];
+    if (pi >= 0 && Math.random() > cfg.skip) {
+      const arp = [d, d + 2, d + 4, d + 6, d + 7, d + 9];
+      const m = norm(degToMidi(arpBase(), arp[pi]), 50, 79);
+      const vel = (bs === 0 ? 0.44 : 0.32) * rnd(0.75, 1.05);
+      playPluck(m, t + rnd(-0.008, 0.008), vel, rnd(-0.45, 0.45), rnd(1800, 3400));
+      emit('arp', m, t);
+    }
+
+    if (Math.random() < cfg.melody * MEL_WEIGHT[bs]) {
+      melDeg += pick([-2, -1, -1, 0, 1, 1, 2, 3, -3]);
+      if (melDeg < 4) melDeg += 3;
+      if (melDeg > 13) melDeg -= 4;
+      if (bs === 0 || bs === 4) {
+        const tones = [d, d + 2, d + 4].map((x) => ((x % 7) + 7) % 7);
+        const tries = [0, 1, -1, 2, -2];
+        for (let i = 0; i < tries.length; i++) {
+          const c = melDeg + tries[i];
+          if (tones.indexOf(((c % 7) + 7) % 7) !== -1) { melDeg = c; break; }
+        }
+      }
+      const m = norm(degToMidi(melBase(), melDeg), 64, 88);
+      playPluck(m, t + rnd(0, 0.014), 0.3 * rnd(0.8, 1.1), rnd(-0.6, 0.6), rnd(2800, 4600));
+      emit('mel', m, t);
+    }
+  }
+
+  function schedule() {
+    if (!playing || !actx || !cfg) return;
+    // Hidden tabs throttle timers to about once a second, so look further ahead there.
+    const horizon = actx.currentTime + (document.hidden ? 1.6 : 0.16);
+    while (nextTime < horizon) {
+      scheduleStep(step, nextTime);
+      step += 1;
+      nextTime += stepDur();
+    }
+    if (rainOn && rainNodes) {
+      if (rainCursor < actx.currentTime) rainCursor = actx.currentTime;
+      while (rainCursor < horizon) {
+        if (Math.random() < 0.28) playDrop(rainCursor + Math.random() * 0.05);
+        rainCursor += 0.05;
+      }
+    }
+  }
+
+  function newKiln() {
+    kilnNo += 1;
+    cfg = makeConfig(scene);
+    melDeg = 7 + Math.floor(rnd(-2, 3));
+    step = 0;
+    if (actx) nextTime = Math.max(nextTime, actx.currentTime + 0.12);
+    V.fireT = 0;
+    kilnNoEl.textContent = '第 ' + kilnNo + ' 窑';
+    kilnDetailEl.textContent = cfg.root.name + ' ' + cfg.mode.name + '，每分钟 ' + cfg.bpm + ' 拍';
+  }
+
+  function setPlayLabel() {
+    btnPlay.textContent = !started ? '点火' : (playing ? '暂停' : '继续');
+  }
+
+  async function play() {
+    if (starting) return;
+    starting = true;
+    try {
+      if (!actx) setupAudio();
+      if (actx.state !== 'running') await actx.resume();
+    } catch (err) {
+      // If the browser refuses audio, the bowl still glazes; pressing again retries.
+    }
+    starting = false;
+    if (!actx) return;
+    if (!started) {
+      started = true;
+      newKiln();
+    }
+    playing = true;
+    nextTime = Math.max(nextTime, actx.currentTime + 0.1);
+    master.gain.cancelScheduledValues(actx.currentTime);
+    master.gain.setTargetAtTime(gainFromVolume(), actx.currentTime, 0.12);
+    if (!schedTimer) schedTimer = setInterval(schedule, 25);
+    schedule();
+    if (rainOn) startRain();
+    setPlayLabel();
+  }
+
+  function pause() {
+    playing = false;
+    if (actx) {
+      const ctxRef = actx;
+      master.gain.cancelScheduledValues(ctxRef.currentTime);
+      master.gain.setTargetAtTime(0, ctxRef.currentTime, 0.15);
+      setTimeout(() => {
+        if (!playing && ctxRef.state === 'running') ctxRef.suspend();
+      }, 800);
+    }
+    setPlayLabel();
+  }
+
+  /* ---------------- visuals ---------------- */
+
+  const V = {
+    w: 0, h: 0, dpr: 1, cx: 0, cy: 0, R: 100,
+    glaze: null, gctx: null, tmp: null, tctx: null,
+    spin: 0, blooms: [], sparks: [], fireT: -1, rainLines: []
+  };
+
+  function layout() {
+    V.dpr = Math.min(2, window.devicePixelRatio || 1);
+    V.w = window.innerWidth;
+    V.h = window.innerHeight;
+    canvas.width = Math.round(V.w * V.dpr);
+    canvas.height = Math.round(V.h * V.dpr);
+    g2.setTransform(V.dpr, 0, 0, V.dpr, 0, 0);
+    const top = header.getBoundingClientRect().bottom + 16;
+    const bottom = V.h - controls.getBoundingClientRect().top + 16;
+    const availH = Math.max(160, V.h - top - bottom);
+    V.R = Math.max(70, Math.min(V.w * 0.38, availH * 0.44));
+    V.cx = V.w / 2;
+    V.cy = top + availH / 2;
+    const size = Math.max(64, Math.ceil(V.R * 2));
+    const old = V.glaze;
+    V.glaze = document.createElement('canvas');
+    V.glaze.width = size;
+    V.glaze.height = size;
+    V.gctx = V.glaze.getContext('2d');
+    V.tmp = document.createElement('canvas');
+    V.tmp.width = size;
+    V.tmp.height = size;
+    V.tctx = V.tmp.getContext('2d');
+    V.gctx.fillStyle = started ? PALETTES[scene].base : PALETTES[scene].raw;
+    V.gctx.fillRect(0, 0, size, size);
+    if (old) V.gctx.drawImage(old, 0, 0, size, size);
+    V.rainLines.length = 0;
+  }
+
+  function paintRaw() {
+    V.gctx.fillStyle = PALETTES[scene].raw;
+    V.gctx.fillRect(0, 0, V.glaze.width, V.glaze.height);
+  }
+
+  function addSpark(ang, rad) {
+    V.sparks.push({ ang: ang, rad: rad, spin0: V.spin, age: 0, life: rnd(1.4, 2.6), size: rnd(0.8, 1.4) });
+    if (V.sparks.length > 80) V.sparks.splice(0, V.sparks.length - 80);
+  }
+
+  function addBloom(e, P) {
+    const pc = (((e.midi - cfg.root.pc) % 12) + 12) % 12;
+    const ang = (pc / 12) * Math.PI * 2 + rnd(-0.2, 0.2);
+    let rad, r0, r1, a, life, color;
+    if (e.kind === 'bass') {
+      rad = rnd(0.02, 0.3); r0 = 0.1; r1 = rnd(0.42, 0.6); a = 0.42; life = rnd(3.4, 5); color = pick(P.bass);
+    } else if (e.kind === 'arp') {
+      rad = rnd(0.28, 0.72); r0 = 0.03; r1 = rnd(0.11, 0.2); a = 0.5; life = rnd(2, 3.2); color = pick(P.arp);
+    } else if (e.kind === 'mel') {
+      rad = rnd(0.5, 0.86); r0 = 0.02; r1 = rnd(0.06, 0.11); a = 0.7; life = rnd(1.6, 2.4); color = pick(P.mel);
+      addSpark(ang, rad);
+    } else {
+      rad = rnd(0.15, 0.65); r0 = 0.05; r1 = rnd(0.26, 0.4); a = 0.75; life = rnd(4, 6); color = pick(P.splash);
+    }
+    V.blooms.push({ x: Math.cos(ang) * rad, y: Math.sin(ang) * rad, r0: r0, r1: r1, a: a, life: life, age: 0, rgb: hexToRgb(color) });
+    if (V.blooms.length > 140) V.blooms.splice(0, V.blooms.length - 140);
+  }
+
+  function drawRain(g, P, dt) {
+    if (!V.rainLines.length) {
+      for (let i = 0; i < 70; i++) {
+        V.rainLines.push({ x: Math.random() * V.w, y: Math.random() * V.h, len: rnd(10, 26), sp: rnd(260, 420) });
+      }
+    }
+    g.save();
+    g.strokeStyle = P.rain;
+    g.lineWidth = 1;
+    g.beginPath();
+    for (let i = 0; i < V.rainLines.length; i++) {
+      const r = V.rainLines[i];
+      r.y += r.sp * dt;
+      r.x += r.sp * dt * 0.12;
+      if (r.y - r.len > V.h) { r.y = -rnd(0, 40); r.x = Math.random() * V.w; }
+      g.moveTo(r.x, r.y);
+      g.lineTo(r.x - r.len * 0.12, r.y - r.len);
+    }
+    g.stroke();
+    g.restore();
+  }
+
+  function drawSparks(g, P, dt) {
+    for (let i = V.sparks.length - 1; i >= 0; i--) {
+      const s = V.sparks[i];
+      s.age += dt;
+      const u = s.age / s.life;
+      if (u >= 1) { V.sparks.splice(i, 1); continue; }
+      const A = s.ang + (V.spin - s.spin0);
+      const x = V.cx + Math.cos(A) * s.rad * V.R;
+      const y = V.cy + Math.sin(A) * s.rad * V.R;
+      const a = (u < 0.15 ? u / 0.15 : Math.pow(1 - (u - 0.15) / 0.85, 1.5)) * 0.9;
+      const rr = Math.max(3, V.R * 0.035 * s.size);
+      const grd = g.createRadialGradient(x, y, 0, x, y, rr);
+      grd.addColorStop(0, rgba(P.spark, a));
+      grd.addColorStop(1, rgba(P.spark, 0));
+      g.fillStyle = grd;
+      g.beginPath();
+      g.arc(x, y, rr, 0, Math.PI * 2);
+      g.fill();
+    }
+  }
+
+  function drawScene(P, dt) {
+    const g = g2;
+    const w = V.w, h = V.h, cx = V.cx, cy = V.cy, R = V.R;
+
+    const bg = g.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, P.bgTop);
+    bg.addColorStop(1, P.bgBottom);
+    g.fillStyle = bg;
+    g.fillRect(0, 0, w, h);
+
+    const glow = g.createRadialGradient(cx, cy, R * 0.5, cx, cy, R * 2.1);
+    glow.addColorStop(0, P.glow);
+    glow.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = glow;
+    g.fillRect(0, 0, w, h);
+
+    if (rainOn && playing && !reduceMotion) drawRain(g, P, dt);
+
+    g.save();
+    g.translate(cx, cy + R * 1.0);
+    g.scale(1, 0.22);
+    const sh = g.createRadialGradient(0, 0, 0, 0, 0, R * 1.1);
+    sh.addColorStop(0, P.shadow);
+    sh.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = sh;
+    g.beginPath();
+    g.arc(0, 0, R * 1.1, 0, Math.PI * 2);
+    g.fill();
+    g.restore();
+
+    g.beginPath();
+    g.arc(cx, cy, R * 1.05, 0, Math.PI * 2);
+    g.fillStyle = P.rim;
+    g.fill();
+    g.beginPath();
+    g.arc(cx, cy, R * 1.025, 0, Math.PI * 2);
+    g.fillStyle = P.clay;
+    g.fill();
+
+    g.save();
+    g.beginPath();
+    g.arc(cx, cy, R, 0, Math.PI * 2);
+    g.clip();
+    g.drawImage(V.glaze, cx - R, cy - R, R * 2, R * 2);
+    const dep = g.createRadialGradient(cx, cy, R * 0.5, cx, cy, R);
+    dep.addColorStop(0, 'rgba(0,0,0,0)');
+    dep.addColorStop(1, P.depth);
+    g.fillStyle = dep;
+    g.fillRect(cx - R, cy - R, R * 2, R * 2);
+    const gx = cx - R * 0.36, gy = cy - R * 0.42;
+    const gl = g.createRadialGradient(gx, gy, 0, gx, gy, R * 0.8);
+    gl.addColorStop(0, 'rgba(255,255,255,' + P.gloss + ')');
+    gl.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = gl;
+    g.fillRect(cx - R, cy - R, R * 2, R * 2);
+    drawSparks(g, P, dt);
+    if (V.fireT >= 0) {
+      V.fireT += dt;
+      const u = V.fireT / 1.3;
+      if (u >= 1) {
+        V.fireT = -1;
+      } else {
+        const f = g.createRadialGradient(cx, cy, 0, cx, cy, R);
+        f.addColorStop(0, rgba(P.flash, 0.6 * (1 - u)));
+        f.addColorStop(1, rgba(P.flash, 0.25 * (1 - u)));
+        g.fillStyle = f;
+        g.fillRect(cx - R, cy - R, R * 2, R * 2);
+      }
+    }
+    g.restore();
+
+    if (!started) {
+      g.fillStyle = P.caption;
+      g.font = '400 ' + Math.max(15, Math.round(R * 0.08)) + 'px "Noto Serif SC", "Songti SC", "STSong", serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText('等你点火', cx, cy);
+    }
+  }
+
+  let lastTs = 0;
+  function frame(ts) {
+    const dt = Math.min(0.05, Math.max(0, (ts - lastTs) / 1000));
+    lastTs = ts;
+    const P = PALETTES[scene];
+
+    if (actx && cfg) {
+      const now = actx.currentTime;
+      while (pending.length && pending[0].t <= now) {
+        const e = pending.shift();
+        if (now - e.t < 0.8) addBloom(e, P);
+      }
+    }
+
+    const gz = V.gctx;
+    const size = V.glaze.width;
+    const c = size / 2;
+    if (started) {
+      if (playing && !reduceMotion) {
+        const dA = (Math.PI * 2 / 90) * dt;
+        V.spin += dA;
+        V.tctx.clearRect(0, 0, size, size);
+        V.tctx.drawImage(V.glaze, 0, 0);
+        gz.save();
+        gz.fillStyle = P.base;
+        gz.fillRect(0, 0, size, size);
+        gz.translate(c, c);
+        gz.rotate(dA);
+        gz.translate(-c, -c);
+        gz.drawImage(V.tmp, 0, 0);
+        gz.restore();
+      }
+      gz.save();
+      gz.globalAlpha = V.fireT >= 0 ? Math.min(1, dt * 4) : (playing ? dt * 0.1 : dt * 0.03);
+      gz.fillStyle = P.base;
+      gz.fillRect(0, 0, size, size);
+      gz.restore();
+    }
+
+    if (V.blooms.length) {
+      gz.save();
+      gz.globalCompositeOperation = P.composite;
+      for (let i = V.blooms.length - 1; i >= 0; i--) {
+        const b = V.blooms[i];
+        b.age += dt;
+        const u = b.age / b.life;
+        if (u >= 1) { V.blooms.splice(i, 1); continue; }
+        const r = (b.r0 + (b.r1 - b.r0) * (1 - Math.pow(1 - u, 3))) * c;
+        const a = b.a * Math.pow(1 - u, 1.4) * dt * 3.2;
+        const x = c + b.x * c;
+        const y = c + b.y * c;
+        const grd = gz.createRadialGradient(x, y, 0, x, y, r);
+        grd.addColorStop(0, rgba(b.rgb, a));
+        grd.addColorStop(0.55, rgba(b.rgb, a * 0.45));
+        grd.addColorStop(1, rgba(b.rgb, 0));
+        gz.fillStyle = grd;
+        gz.beginPath();
+        gz.arc(x, y, r, 0, Math.PI * 2);
+        gz.fill();
+      }
+      gz.restore();
+    }
+
+    drawScene(P, dt);
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------------- controls ---------------- */
+
+  let sceneChosen = false;
+
+  function applySceneUI() {
+    body.setAttribute('data-scene', scene);
+    btnDawn.setAttribute('aria-pressed', String(scene === 'dawn'));
+    btnNight.setAttribute('aria-pressed', String(scene === 'night'));
+    V.rainLines.length = 0;
+  }
+
+  function setScene(sc) {
+    if (sc === scene) return;
+    scene = sc;
+    applySceneUI();
+    if (actx) buildReverb(sc);
+    if (started) newKiln();
+    else if (V.gctx) paintRaw();
+  }
+
+  btnPlay.addEventListener('click', () => {
+    if (playing) pause();
+    else play();
+  });
+  btnDawn.addEventListener('click', () => { sceneChosen = true; setScene('dawn'); });
+  btnNight.addEventListener('click', () => { sceneChosen = true; setScene('night'); });
+  btnKiln.addEventListener('click', () => {
+    if (!started) { play(); return; }
+    newKiln();
+    if (!playing) play();
+  });
+  btnRain.addEventListener('click', () => {
+    rainOn = !rainOn;
+    btnRain.setAttribute('aria-pressed', String(rainOn));
+    if (!rainOn) {
+      stopRain();
+      V.rainLines.length = 0;
+    } else if (actx && playing) {
+      startRain();
+    }
+  });
+  volInput.addEventListener('input', () => {
+    volume = volInput.value / 100;
+    if (actx && playing) {
+      master.gain.cancelScheduledValues(actx.currentTime);
+      master.gain.setTargetAtTime(gainFromVolume(), actx.currentTime, 0.05);
+    }
+  });
+
+  const followViewer = () => { if (!sceneChosen) setScene(initialScene()); };
+  new MutationObserver(followViewer).observe(doc, { attributes: true, attributeFilter: ['data-theme'] });
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  if (mq.addEventListener) mq.addEventListener('change', followViewer);
+
+  applySceneUI();
+  layout();
+  paintRaw();
+  setPlayLabel();
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(layout, 120);
+  });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+
+  requestAnimationFrame((ts) => {
+    lastTs = ts;
+    requestAnimationFrame(frame);
+  });
+})();
+</script>
+</body>
+</html>
